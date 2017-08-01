@@ -42,7 +42,7 @@ public class CountryWeather {
 
             for (String aTempType : tempTypeList) {
 
-                String weatherDataUrl = preLink + aTempType + "/ranked/" + country + ".txt";
+                String weatherDataUrl = preLink + aTempType + "/date/" + country + ".txt";
                 String weatherDataFileName = aTempType + "_" + country;
                 File file = new File(dir, weatherDataFileName);
                 file.createNewFile();
@@ -51,7 +51,6 @@ public class CountryWeather {
             }
         }
         csvBufferedWriter.flush();
-
     }
 
         private void csvWrite(String weatherDataUrl, String tempType, String country) throws IOException {
@@ -63,61 +62,81 @@ public class CountryWeather {
             BufferedReader br = new BufferedReader(isr);
 
             String line = null;
-            String[] columns = null;
-            String[] columns3 = new String[3000];
-            String[] splited = null;
+            String[] months = null;
+            String[] values = null;
 
-            while (null != (line = br.readLine())) {
+            while ((line = br.readLine()) != null) {
 
-                if (line.contains("ANN")) {
+                if (line.startsWith("Year")) {
 
                     line = line.trim().replaceAll("\\s{2,}", " ");
-                    columns = line.split("[\\s]+");
-
-                    for (int i=0; i<columns.length; i++) {
-
-                        String ss;
-
-                        if ( !columns[i].equals("Year"))  {
-                            ss = columns[i];
-                            columns3[i] = ss;
-                        }
-                    }
-                    System.out.println();
+                    months = line.split("[\\s]+");
 
                 }
-                else if (null != columns) {
+
+                else if (months != null) {
 
                     line = line.trim().replaceAll("\\s{2,}+", " ");
-                    splited = line.split("[\\s]+");
+                    values = line.split("[\\s]+");
 
-                        for (int j = 0; j < splited.length ; j++) {
+                        for (int j = 0; j < values.length ; j++) {
 
-                            String csvString1 = null;
-                            if (splited.length == 14) {
+                            if( j != 0) {
 
-                                if (columns3[j].equals("JUN")) {
-                                    csvString1 = country + ", " + tempType + ", " + splited[j + 1] + ", " + columns3[j] + ", " + splited[j];
-                                    csvBufferedWriter.append(csvString1);
+                                String csvString = null;
+
+                            if (values.length == 9) {
+
+                                if (months[j].equals("JUN")) {
+                                    csvString = country + ", " + tempType + ", " + values[0] + ", " + months[j] + ", " + values[j];
+                                    csvBufferedWriter.append(csvString);
                                     csvBufferedWriter.newLine();
 
-                                    csvString1 = country + ", " + tempType + ", " + splited[j + 2] + ", " + "SPR" + ", " + splited[j+1];
-                                    csvBufferedWriter.append(csvString1);
+                                    for ( int k= 7 ; k < 13; k++ ) {
+
+                                        csvString = country + ", " + tempType + ", " + values[0] + ", " + months[k] + ", " + "N/A";
+                                        csvBufferedWriter.append(csvString);
+                                        csvBufferedWriter.newLine();
+                                    }
+
+                                    csvString = country + ", " + tempType + ", " + values[0] + ", " + months[13] + ", " + values[j+1];
+                                    csvBufferedWriter.append(csvString);
                                     csvBufferedWriter.newLine();
+
+                                    csvString = country + ", " + tempType + ", " + values[0] + ", " + months[14] + ", " + values[j+2];
+                                    csvBufferedWriter.append(csvString);
+                                    csvBufferedWriter.newLine();
+
+                                    for ( int m= 15 ; m < 18; m++ ) {
+
+                                        csvString = country + ", " + tempType + ", " + values[0] + ", " + months[m] + ", " + "N/A";
+                                        csvBufferedWriter.append(csvString);
+                                        csvBufferedWriter.newLine();
+                                    }
                                     break;
+
                                 }
                                 else {
-                                    csvString1 = country + ", " + tempType + ", " + splited[j + 1] + ", " + columns3[j] + ", " + splited[j];
-                                    j = j + 1;
-                                    csvBufferedWriter.append(csvString1);
+                                    csvString = country + ", " + tempType + ", " + values[0] + ", " + months[j] + ", " + values[j];
+                                    csvBufferedWriter.append(csvString);
                                     csvBufferedWriter.newLine();
                                 }
                             }
                             else {
-                                csvString1 = country + ", " + tempType + ", " + splited[j + 1] + ", " + columns3[j] + ", " + splited[j];
-                                j = j + 1;
-                                csvBufferedWriter.append(csvString1);
-                                csvBufferedWriter.newLine();
+
+                                if (values[j].equals("---")) {
+
+                                    csvString = country + ", " + tempType + ", " + values[0] + ", " + months[j] + ", " + "N/A";
+                                    csvBufferedWriter.append(csvString);
+                                    csvBufferedWriter.newLine();
+
+                                } else {
+                                    csvString = country + ", " + tempType + ", " + values[0] + ", " + months[j] + ", " + values[j];
+                                    csvBufferedWriter.append(csvString);
+                                    csvBufferedWriter.newLine();
+
+                                }
+                            }
                             }
                         }
                 }
